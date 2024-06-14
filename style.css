@@ -1,0 +1,43 @@
+body {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  font-size: 1.2rem;
+}
+
+.topnav {
+  overflow: hidden;
+  background-color: #049faa;
+  color: white;
+  font-size: 1rem;
+  padding: 10px;
+}
+
+.cards {
+  display: grid;
+  grid-gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-top: 20px;
+}
+
+.card {
+  background-color: white;
+  box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, 0.5);
+  padding: 5%;
+}
+
+.card p img {
+  padding-top: 10px;
+  width: 30px;
+  height: 20px;
+}
+
+.reading {
+  font-size: 1.4rem;
+}
