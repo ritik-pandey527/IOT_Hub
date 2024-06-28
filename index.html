@@ -66,7 +66,29 @@
         <p><img src="./images/PMS.png" /> PMS 10</p>
         <p><span class="reading" id="pms10"></span> ug/m3</p>
       </div>
+      <div class="card">
+        <p><img src="./images/voc.png" /> VOC Index</p>
+        <p><span class="reading" id="voc"></span></p>
+      </div>
     </div>
+
+    <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+    <script>const xValues = ["Italy", "France", "Spain", "USA", "Argentina"];
+      const yValues = [55, 49, 44, 24, 15];
+      const barColors = ["red", "green","blue","orange","brown"];
+      
+      new Chart("myChart", {
+        type: "bar",
+        data: {
+          labels: xValues,
+          datasets: [{
+            backgroundColor: barColors,
+            data: yValues
+          }]
+        },
+      });</script>
+
   </body>
   <script src="main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 </html>

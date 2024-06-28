@@ -19,6 +19,7 @@ function updateSensorReadings(data) {
   document.getElementById("pms1_0").innerText = data.PMS5003.PMS1_0 || "N/A";
   document.getElementById("pms2_5").innerText = data.PMS5003.PMS2_5 || "N/A";
   document.getElementById("pms10").innerText = data.PMS5003.PMS10 || "N/A";
+  document.getElementById("voc").innerText = data.TVOC.Index || "N/A";
 }
 
 // Reference to sensor data in Firebase
