@@ -16,9 +16,9 @@ function updateSensorReadings(data) {
   document.getElementById("temp").innerText = data.DHT11.Temperature || "N/A";
   document.getElementById("hum").innerText = data.DHT11.Humidity || "N/A";
   document.getElementById("co2").innerText = data['MH-Z19B'].CO2 || "N/A";
-  document.getElementById("pms1_0").innerText = data.PMS5003.PMS1_0 || "N/A";
-  document.getElementById("pms2_5").innerText = data.PMS5003.PMS2_5 || "N/A";
-  document.getElementById("pms10").innerText = data.PMS5003.PMS10 || "N/A";
+  document.getElementById("pms1_0").innerText = data.PMS5003.PMS1_0 || "0";
+  document.getElementById("pms2_5").innerText = data.PMS5003.PMS2_5 || "0";
+  document.getElementById("pms10").innerText = data.PMS5003.PMS10 || "0";
   document.getElementById("voc").innerText = data.TVOC.Index || "N/A";
 }
 
