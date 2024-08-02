@@ -1,9 +1,5 @@
-// // Import the functions you need from the SDKs you need
-// import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-// import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
+ // Your Firebase configuration
+ const firebaseConfig = {
   apiKey: "AIzaSyAuLO4N3Ay9YhIvh9e8vWpMCwxZajTipAE",
   authDomain: "outdoor-aqd.firebaseapp.com",
   databaseURL: "https://outdoor-aqd-default-rtdb.firebaseio.com",
@@ -16,6 +12,9 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
+// Global variable to store CSV content
+let csvContent = 'Timestamp,Temperature,Humidity,CO2,PM1.0,PM2.5,PM10,TVOC\n';
+
 // Function to update sensor readings
 function updateSensorReadings(data) {
   document.getElementById("temp").innerText = data.DHT11.Temperature || "N/A";
@@ -25,55 +24,55 @@ function updateSensorReadings(data) {
   document.getElementById("pms2_5").innerText = data.PMS5003.PMS2_5 || "N/A";
   document.getElementById("pms10").innerText = data.PMS5003.PMS10 || "N/A";
   document.getElementById("voc").innerText = data.TVOC.Index || "N/A";
+  // Update CSV content
+  updateCSVContent(data);
+}
+
+// Function to generate CSV content
+function generateCSV(data) {
+  return [
+      new Date().toISOString(),
+      data.DHT11.Temperature || "N/A",
+      data.DHT11.Humidity || "N/A",
+      data['MH-Z19B'].CO2 || "N/A",
+      data.PMS5003.PMS1_0 || "N/A",
+      data.PMS5003.PMS2_5 || "N/A",
+      data.PMS5003.PMS10 || "N/A",
+      data.TVOC.Index || "N/A"
+  ].join(',');
+}
+
+// Update CSV content in memory
+function updateCSVContent(data) {
+  csvContent += generateCSV(data) + '\n';
+}
+
+// Create download link
+function downloadCSV() {
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.setAttribute('download', 'data.csv');
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 // Reference to sensor data in Firebase
-var sensorDataRef = firebase.database().ref("Sensors/ESP101/");
+const sensorDataRef = firebase.database().ref("Sensors/ESP101/");
 
 // Update sensor readings on data changes
 sensorDataRef.on("value", function(snapshot) {
   const data = snapshot.val();
   if (data) {
-    updateSensorReadings(data);
+      updateSensorReadings(data);
   } else {
-    console.log("No sensor data found in Firebase");
+      console.log("No sensor data found in Firebase");
   }
 }, function(error) {
   console.log("Error: " + error.code);
 });
 
-// Function to generate random sensor data
-function generateRandomSensorData() {
-  return {
-    DHT11: {
-      Temperature: (Math.random() * 30 + 15).toFixed(2), // Random temperature between 15°C and 45°C
-      Humidity: (Math.random() * 40 + 30).toFixed(2)    // Random humidity between 30% and 70%
-    },
-    'MH-Z19B': {
-      CO2: Math.floor(Math.random() * 400 + 400) // Random CO2 level between 400 and 800
-    },
-    PMS5003: {
-      PMS1_0: Math.floor(Math.random() * 50 + 5),  // Random PM1.0 value between 5 and 55
-      PMS2_5: Math.floor(Math.random() * 50 + 5),  // Random PM2.5 value between 5 and 55
-      PMS10: Math.floor(Math.random() * 50 + 5)    // Random PM10 value between 5 and 55
-    },
-    TVOC: {
-      Index: Math.floor(Math.random() * 100 + 10)  // Random TVOC Index between 10 and 110
-    }
-  };
-}
-
-// Function to update Firebase with random data
-function updateFirebaseWithRandomData() {
-  var randomData = generateRandomSensorData();
-  sensorDataRef.set(randomData, function(error) {
-    if (error) {
-      console.log("Data could not be written: " + error.message);
-    } else {
-      console.log("Data updated successfully");
-    }
-  });
-}
-
-// Update Firebase with random data every 5 seconds
-setInterval(updateFirebaseWithRandomData, 5000);
+// Handle CSV download button click
+document.getElementById('download').addEventListener('click', downloadCSV); 
