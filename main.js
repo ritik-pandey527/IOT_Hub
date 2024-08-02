@@ -14,8 +14,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
 
 // Function to update sensor readings
 function updateSensorReadings(data) {
@@ -29,17 +28,17 @@ function updateSensorReadings(data) {
 }
 
 // Reference to sensor data in Firebase
-const sensorDataRef = ref(database, "Sensors/ESP101/");
+var sensorDataRef = firebase.database().ref("Sensors/ESP101/");
 
 // Update sensor readings on data changes
-onValue(sensorDataRef, (snapshot) => {
+sensorDataRef.on("value", function(snapshot) {
   const data = snapshot.val();
   if (data) {
     updateSensorReadings(data);
   } else {
     console.log("No sensor data found in Firebase");
   }
-}, (error) => {
+}, function(error) {
   console.log("Error: " + error.code);
 });
 
@@ -66,14 +65,14 @@ function generateRandomSensorData() {
 
 // Function to update Firebase with random data
 function updateFirebaseWithRandomData() {
-  const randomData = generateRandomSensorData();
-  set(sensorDataRef, randomData)
-    .then(() => {
-      console.log("Data updated successfully");
-    })
-    .catch((error) => {
+  var randomData = generateRandomSensorData();
+  sensorDataRef.set(randomData, function(error) {
+    if (error) {
       console.log("Data could not be written: " + error.message);
-    });
+    } else {
+      console.log("Data updated successfully");
+    }
+  });
 }
 
 // Update Firebase with random data every 5 seconds
