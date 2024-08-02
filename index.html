@@ -1,79 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ESP32 IoT App</title>
-    <link
-      rel="stylesheet"
-      href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
-      integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
-      crossorigin="anonymous"
-    />
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link rel="stylesheet" type="text/css" href="style.css" />
-  </head>
-  <body>
-    <!--TOP BAR-->
-    <div class="topnav">
-      <h1>Sensor Readings App <i class="fas fa-clipboard-list"></i></h1>
-    </div>
-
-    <!--CONTENT (SENSOR READINGS)-->
-    <div class="cards">
-      <!--TEMPERATURE-->
-      <div class="card">
-        <p>
-          <i class="fas fa-thermometer-half" style="color: #059e8a"></i>
-          TEMPERATURE
-        </p>
-        <p><span class="reading" id="temp"></span> &deg;C</p>
-      </div>
-      <!--HUMIDITY-->
-      <div class="card">
-        <p><i class="fas fa-tint" style="color: #00add6"></i> HUMIDITY</p>
-        <p><span class="reading" id="hum"></span> &percnt;</p>
-      </div>
-      <!--CO2-->
-      <div class="card">
-        <p><img src="./images/CO2.png" /> CO2</p>
-        <p><span class="reading" id="co2"></span> PPM</p>
-      </div>
-    </div>
-
-    <div class="cards">
-      <!--Pressure-->
-      <!-- <div class="card">
-        <p>
-          <i class="fas fa-angle-double-down" style="color: #e1e437"></i>
-          PRESSURE
-        </p>
-        <p><span class="reading" id="pms10"></span> hPa</p>
-      </div> -->
-      <!--pms1.0-->
-      <div class="card">
-        <p><img src="./images/PMS.png" /> PMS 1.0</p>
-        <p><span class="reading" id="pms1_0"></span> ug/m3</p>
-      </div>
-      <!--pms2.5-->
-      <div class="card">
-        <p><img src="./images/PMS.png" /> PMS 2.5</p>
-        <p><span class="reading" id="pms2_5"></span> ug/m3</p>
-      </div>
-      <div class="card">
-        <p><img src="./images/PMS.png" /> PMS 10</p>
-        <p><span class="reading" id="pms10"></span> ug/m3</p>
-      </div>
-      <div class="card">
-        <p><img src="./images/voc.png" /> VOC Index</p>
-        <p><span class="reading" id="voc"></span></p>
-      </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Data to CSV</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+</head>
+<body>
+    <div>
+        <p>Temperature: <span id="temp">N/A</span></p>
+        <p>Humidity: <span id="hum">N/A</span></p>
+        <p>CO2: <span id="co2">N/A</span></p>
+        <p>PM1.0: <span id="pms1_0">N/A</span></p>
+        <p>PM2.5: <span id="pms2_5">N/A</span></p>
+        <p>PM10: <span id="pms10">N/A</span></p>
+        <p>TVOC: <span id="voc">N/A</span></p>
     </div>
     <button id="download">Download CSV</button>
-    
 
-  </body>
-  <script src="main.js"></script>
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAuLO4N3Ay9YhIvh9e8vWpMCwxZajTipAE",
+            authDomain: "outdoor-aqd.firebaseapp.com",
+            databaseURL: "https://outdoor-aqd-default-rtdb.firebaseio.com",
+            projectId: "outdoor-aqd",
+            storageBucket: "outdoor-aqd.appspot.com",
+            messagingSenderId: "664373314974",
+            appId: "1:664373314974:web:e9056029dd47539330c28f"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Global variable to store CSV content
+        let csvContent = 'Timestamp,Temperature,Humidity,CO2,PM1.0,PM2.5,PM10,TVOC\n';
+
+        // Function to update sensor readings
+        function updateSensorReadings(data) {
+            document.getElementById("temp").innerText = data.DHT11.Temperature || "N/A";
+            document.getElementById("hum").innerText = data.DHT11.Humidity || "N/A";
+            document.getElementById("co2").innerText = data['MH-Z19B'].CO2 || "N/A";
+            document.getElementById("pms1_0").innerText = data.PMS5003.PMS1_0 || "N/A";
+            document.getElementById("pms2_5").innerText = data.PMS5003.PMS2_5 || "N/A";
+            document.getElementById("pms10").innerText = data.PMS5003.PMS10 || "N/A";
+            document.getElementById("voc").innerText = data.TVOC.Index || "N/A";
+            // Update CSV content
+            updateCSVContent(data);
+        }
+
+        // Function to generate CSV content
+        function generateCSV(data) {
+            return [
+                new Date().toISOString(),
+                data.DHT11.Temperature || "N/A",
+                data.DHT11.Humidity || "N/A",
+                data['MH-Z19B'].CO2 || "N/A",
+                data.PMS5003.PMS1_0 || "N/A",
+                data.PMS5003.PMS2_5 || "N/A",
+                data.PMS5003.PMS10 || "N/A",
+                data.TVOC.Index || "N/A"
+            ].join(',');
+        }
+
+        // Update CSV content in memory
+        function updateCSVContent(data) {
+            csvContent += generateCSV(data) + '\n';
+        }
+
+        // Create download link
+        function downloadCSV() {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.setAttribute('download', 'data.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Reference to sensor data in Firebase
+        const sensorDataRef = firebase.database().ref("Sensors/ESP101/");
+
+        // Update sensor readings on data changes
+        sensorDataRef.on("value", function(snapshot) {
+            const data = snapshot.val();
+            if (data) {
+                updateSensorReadings(data);
+            } else {
+                console.log("No sensor data found in Firebase");
+            }
+        }, function(error) {
+            console.log("Error: " + error.code);
+        });
+
+        // Handle CSV download button click
+        document.getElementById('download').addEventListener('click', downloadCSV);
+    </script>
+</body>
 </html>
